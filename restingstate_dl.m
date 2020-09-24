@@ -19,10 +19,10 @@ numHiddenUnits = 2000;
 numClasses = 2;
 layers = [ ...
     sequenceInputLayer(inputSize, 'normalization', 'zerocenter')
-    ... %    bilstmLayer(numHiddenUnits,'OutputMode','last')
-    ... %    lstmLayer(numHiddenUnits,'OutputMode','last')
-    gruLayer(numHiddenUnits,'OutputMode','last')
-    fullyConnectedLayer(numHiddenUnits)
+    ... % bilstmLayer(numHiddenUnits,'OutputMode','last')
+    ... % lstmLayer(numHiddenUnits,'OutputMode','last')
+    ... % gruLayer(numHiddenUnits,'OutputMode','last')
+    ... % fullyConnectedLayer(numHiddenUnits)
     gruLayer(numHiddenUnits,'OutputMode','last')
     fullyConnectedLayer(numClasses)
     softmaxLayer
