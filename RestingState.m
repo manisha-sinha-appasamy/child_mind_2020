@@ -1,90 +1,55 @@
-load('RestingState.mat');
-for iEvent = 1:length(EEG.event)
-    EEG.event(iEvent).latency = EEG.event(iEvent).sample;
-end
-evtSample = 0;
-evtType  = 0;
-refractoryPeriod = 0;
-newevents = [];
-
-while evtSample < EEG.pnts
-    iEvent = find( [ EEG.event.latency ] < evtSample );
-    
-    if ~isempty(iEvent)
-        if isequal( EEG.event(iEvent).type, '20  ')
-            EEG.event(iEvent) = [];
-            evtType = 1;
-            refractoryPeriod = 3;
-        elseif isequal( EEG.event(iEvent).type, '30  ')
-            EEG.event(iEvent) = [];
-            evtType = 2;
-            refractoryPeriod = 3;
-        else
-            EEG.event(iEvent) = [];
-            evtType = 0;
-            refractoryPeriod = 3;
+if exist('TrainData.mat', 'file')
+    % Load prepared data
+    % XTrain - cell array of elements 129 channels x 100 samples
+    % YTrain - categorical array of 0 and 1s (same length as XTrain)
+    load('-mat', 'TrainData.mat');
+else
         end
     end
     
-    if refractoryPeriod > 0
-        refractoryPeriod = refractoryPeriod-1;
-    else
-        if isempty( find( [ EEG.event.latency ] < evtSample+EEG.srate )) % no event in the following second
-            if evtType == 1
-                newevents(end+1).type = 'EyesO';
-                newevents(end).latency = evtSample;
-            elseif evtType == 2
-                newevents(end+1).type = 'EyesC';
-                newevents(end).latency = evtSample;
-            end
-        end
-    end
-    evtSample = evtSample+EEG.srate;
-    
+    XTrain = [XTrain{:} ]';
+    YTrain = categorical( [YTrain{:} ]');
+    inds = find(cellfun(@(x)size(x,2), XTrain) >100);
+    XTrain(inds) = [];
+    YTrain(inds) = [];
+    save('-mat', 'TrainData.mat', 'XTrain', 'YTrain');
 end
-EEG.event = newevents;
-
-EEG2 = pop_epoch( EEG, {  'EyesO'  }, [0 1], 'epochinfo', 'yes');
-EEG2.condition = 'eyeso';
-
-EEG3 = pop_epoch( EEG, {  'EyesC'  }, [0 1], 'epochinfo', 'yes');
-EEG3.condition = 'eyesc';
-
-XTrain = {};
-YTrain = [];
-for iTrial = 1:EEG2.trials
-    XTrain{end+1} = EEG2.data(:,:,iTrial);
-    YTrain(end+1) = 0;
-end
-for iTrial = 1:EEG2.trials
-    XTrain{end+1} = EEG3.data(:,:,iTrial);
-    YTrain(end+1) = 1;
-end
-XTrain = XTrain';
-YTrain = categorical(YTrain');
-
 % LSTM
 inputSize = 129;
-numHiddenUnits = 100;
+numHiddenUnits = 2000;
 numClasses = 2;
 
+%    bilstmLayer(numHiddenUnits,'OutputMode','last')
+%    lstmLayer(numHiddenUnits,'OutputMode','last')
 layers = [ ...
-    sequenceInputLayer(inputSize)
-    bilstmLayer(numHiddenUnits,'OutputMode','last')
+    sequenceInputLayer(inputSize, 'normalization', 'zerocenter')
+    gruLayer(numHiddenUnits,'OutputMode','last')
+    fullyConnectedLayer(numHiddenUnits)
+    gruLayer(numHiddenUnits,'OutputMode','last')
     fullyConnectedLayer(numClasses)
     softmaxLayer
     classificationLayer]
 
 % Training
-maxEpochs = 100;
+maxEpochs = 2000;
 
 options = trainingOptions('adam', ...
-    'ExecutionEnvironment','auto', ...
+    'ExecutionEnvironment','gpu', ...
     'GradientThreshold',1, ...
     'MaxEpochs',maxEpochs, ...
+    'MiniBatchSize', 160, ...
     'SequenceLength','longest', ...
-    'Shuffle','never', ...
-    'Verbose',0, ...
-    'Plots','training-progress');
+    'Shuffle','every-epoch', ... % or never
+    'Verbose',1, ...
+    'VerboseFrequency', 20);
+%    'Plots','training-progress');
+tic
 net = trainNetwork(XTrain,YTrain,layers,options);
-
+YPred = classify(net,XTrain, 'SequenceLength','longest');
+acc = sum(YTrain == YPred)./numel(YTrain)
+toc
+tic
+net = trainNetwork(XTrain,YTrain,layers,options);
+YPred = classify(net,XTrain, 'SequenceLength','longest');
+acc = sum(YTrain == YPred)./numel(YTrain)
+toc
