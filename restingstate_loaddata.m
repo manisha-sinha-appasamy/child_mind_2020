@@ -8,7 +8,7 @@ fileNames = dir(fullfile(folderout, '*.set'));
 
 XOri = cell(1,length(fileNames));
 YOri = cell(1,length(fileNames));
-parfor iFile = 1:length(fileNames)
+for iFile = 1:length(fileNames)
     fprintf('Dataset %d\n', iFile);
     EEG = pop_loadset(fullfile(fileNames(iFile).folder, fileNames(iFile).name));
     if mod(EEG.trials,2) == 0
