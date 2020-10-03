@@ -53,6 +53,7 @@ if isempty(which('eeg_checkset.m'))
 end
 
 % read the CSV file
+disp('Loading info file...');
 info = loadtxt('HBN_all_Pheno.csv', 'delim', ',', 'verbose', 'off');
 info = info(2:end,:);
 
@@ -60,7 +61,7 @@ XTrain = cell(1,length(folders));
 YTrain = cell(1,length(folders));
 issueFlag = cell(1, length(folders));
 count = 1;
-parfor iFold = 1:length(folders)
+for iFold = 1:length(folders)
     %for iFold = 1:6 %length(folders)
     
     fileName = fullfile(folders(iFold).folder, folders(iFold).name, 'EEG/raw/mat_format/RestingState.mat');
@@ -78,7 +79,7 @@ parfor iFold = 1:length(folders)
     end
     infoRow = strmatch(folders(iFold).name, info(:,1)', 'exact');
     if exist(fileName, 'file') && length(infoRow) > 0
-        try
+        %try
             EEG = load(fileName);
             EEG = EEG.EEG;
             
@@ -119,9 +120,9 @@ parfor iFold = 1:length(folders)
             else
                 issueFlag{iFold} = 'Not 129 channels';
             end
-        catch
-            issueFlag{iFold} = lasterr;
-        end
+        %catch
+        %    issueFlag{iFold} = lasterr;
+        %end
     end
 end
 
