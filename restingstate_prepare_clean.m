@@ -1,42 +1,49 @@
-% Issues at indices (empty means no issues): 124   216   253   304   405   525   593   620   627   787   824   931   956  1180  1334  1341  1384  1477  1524  1702  1721  1884  1968  2326  2423  2456  2528
-%
+% Issues at indices (empty means no issues): 124   216   304   405   525   537   620   627   787   824   931   956  1180  1341  1384  1477  1524  1609  1636  1702  1721  1968  2423  2456  2528
+% 
 % ans =
+% 
+%   25x1 cell array
+% 
+%     {'Error using griddedInterpolant...'     }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using griddedInterpolant...'     }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Reference to non-existent field 'EEG'.'}
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using griddedInterpolant...'     }
+%     {'Error using griddedInterpolant...'     }
+%     {'Reference to non-existent field 'EEG'.'}
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using griddedInterpolant...'     }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Error using pop_epoch (line 261)...'   }
+%     {'Reference to non-existent field 'EEG'.'}
 %
-%   27×1 cell array
-%
-%     {'Not 129 channels'                                                                       }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Error using pop_epoch (line 261)?pop_epoch(): empty epoch range (no epochs were found).'}
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Error using pop_epoch (line 261)?pop_epoch(): empty epoch range (no epochs were found).'}
-%     {'Error using pop_epoch (line 261)?pop_epoch(): empty epoch range (no epochs were found).'}
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Reference to non-existent field 'EEG'.'                                                 }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Reference to non-existent field 'EEG'.'                                                 }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Not 129 channels'                                                                       }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Less eyes closed than eyes open'                                                        }
-%     {'Reference to non-existent field 'EEG'.'
+%     'Error using griddedInterpolant
+%      The grid vectors must contain unique points.'
+% 
+%      'Error using pop_epoch (line 261)
+%      pop_epoch(): empty epoch range (no epochs were found).'
+% 
+%      'Reference to non-existent field 'EEG'.'
 
 clear
+try, parpool(23); end
 
 % Path to data
 folderin  = '../child-mind-uncompressed';
-folderout = '../child-mind-restingstate';
+folderout = '../child-mind-restingstate_v2';
 folders = dir(folderin);
 epochSize = 15;
 
@@ -61,7 +68,7 @@ XTrain = cell(1,length(folders));
 YTrain = cell(1,length(folders));
 issueFlag = cell(1, length(folders));
 count = 1;
-for iFold = 1:length(folders)
+parfor iFold = 1:length(folders)
     %for iFold = 1:6 %length(folders)
     
     fileName = fullfile(folders(iFold).folder, folders(iFold).name, 'EEG/raw/mat_format/RestingState.mat');
@@ -79,7 +86,7 @@ for iFold = 1:length(folders)
     end
     infoRow = strmatch(folders(iFold).name, info(:,1)', 'exact');
     if exist(fileName, 'file') && length(infoRow) > 0
-        %try
+        try
             EEG = load(fileName);
             EEG = EEG.EEG;
             
@@ -104,25 +111,18 @@ for iFold = 1:length(folders)
                 
                 EEGeyeso = pop_epoch( NEWEEG, {  '20  ' }, [4  19], 'newname', 'Eyes open', 'epochinfo', 'yes');
                 EEGeyeso.eyesclosed = 0;
-                pop_saveset(EEGeyesc, fileNameOpenSet);
+                pop_saveset(EEGeyeso, fileNameOpenSet);
                 
                 EEGeyesc = pop_epoch( NEWEEG, {  '30  ' }, [4  19], 'newname', 'Eyes closed', 'epochinfo', 'yes');
                 EEGeyesc.eyesclosed = 1;
                 pop_saveset(EEGeyesc, fileNameClosedSet);
                 
-                
-                % save epoched datasets as .set and .mat files
-                EEG2 = pop_epoch( EEG, {  'EyesO'  }, [0 1], 'epochinfo', 'yes');
-                EEG2.condition = 'eyeso';
-                
-                EEG3 = pop_epoch( EEG, {  'EyesC'  }, [0 1], 'epochinfo', 'yes');
-                EEG3.condition = 'eyesc';
             else
                 issueFlag{iFold} = 'Not 129 channels';
             end
-        %catch
-        %    issueFlag{iFold} = lasterr;
-        %end
+        catch
+            issueFlag{iFold} = lasterr;
+        end
     end
 end
 
