@@ -1,5 +1,5 @@
 clear
-addpath('/home/arno/eeglab');
+addpath('../eeglab');
 eeglab; close;
 
 % get XOri, XTest and XHold

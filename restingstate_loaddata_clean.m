@@ -1,5 +1,5 @@
 clear
-addpath('/home/arno/eeglab');
+addpath('../eeglab');
 eeglab; close;
 
 % get XOri, XTest and XHold
@@ -59,3 +59,8 @@ if ~isempty(inds)
     XOri(inds) = [];
     YOri(inds) = [];
 end
+
+% remove data with channel containing 0s
+indRm = find(cellfun(@(x)any(x(:,2) == 0), XOri) == 1); % same as using sum
+XOri(indRm) = [];
+YOri(indRm) = [];
