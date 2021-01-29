@@ -17,8 +17,8 @@ parfor iX = 1:length(XOri)
     
     % get frequency bands
     theta = mean(XSpecTmp(:, freqRanges(1,1):freqRanges(1,2)), 2);
-    alpha = mean(XSpecTmp(:, freqRanges(1,1):freqRanges(1,2)), 2);
-    beta  = mean(XSpecTmp(:, freqRanges(1,1):freqRanges(1,2)), 2);
+    alpha = mean(XSpecTmp(:, freqRanges(2,1):freqRanges(2,2)), 2);
+    beta  = mean(XSpecTmp(:, freqRanges(3,1):freqRanges(3,2)), 2);
     
     % get grids
     [~, gridTheta] = topoplot( theta, EEG.chanlocs, 'verbose', 'off', 'gridscale', 28, 'noplot', 'on', 'chaninfo', EEG(1).chaninfo);
@@ -37,4 +37,4 @@ end
 
 XOriSpec = cat(4, topoAll{:});
 
-save('-mat', '-v6', '/expanse/projects/nemar/child_mind_2020/child_mind_spec.mat', 'XOriSpec', 'YOri');
+save('-mat', '-v6', '/expanse/projects/nemar/child_mind_2020/vgg16/child_mind_spec.mat', 'XOriSpec', 'YOri');
