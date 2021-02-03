@@ -9,7 +9,6 @@ cm_checkevents.m                    - Check events for other tasks
 getjobid.m                          - Get SDSC job ID (does not work well or at all)  
 finputcheck.m                       - EEGLAB support function  
 loadtxt.m                           - EEGLAB support function  
-```
 
 Deep learning Matlab files
 -----
