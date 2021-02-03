@@ -1,5 +1,5 @@
 % function restingstate_prepare_spectrum
-%restingstate_loaddata_clean;
+restingstate_loaddata_clean;
 
 % remove spurious data
 indRm = find(cellfun(@(x)any(x(:,2) == 0), XOri) == 1);
