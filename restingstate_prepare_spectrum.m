@@ -1,11 +1,6 @@
 % function restingstate_prepare_spectrum
 restingstate_loaddata_clean;
 
-% remove spurious data
-indRm = find(cellfun(@(x)any(x(:,2) == 0), XOri) == 1);
-XOri(indRm) = [];
-YOri(indRm) = [];
-
 EEG = EEGOpen;
 freqRanges = [4 7; 7 13; 14 30]; % frequencies, but also indices
 topoAll = cell(1, length(XOri));

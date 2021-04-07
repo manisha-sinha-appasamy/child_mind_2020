@@ -3,14 +3,8 @@
 % see restinstate_prepare.m for data segmentation
 % Arnaud Delorme - September 2020
 
-% get job information
-jobid = getjobid
-diary(sprintf('log_%s.txt', jobid.jobid));
-mfilename
-jobid = getjobid
-
 dataType = 'raw' % do not add ;
-% dataType = 'clean' % do not add ;
+dataType = 'clean' % do not add ;
 
 % load the data
 if ~exist('XOri', 'var')
@@ -24,25 +18,28 @@ if ~exist('XOri', 'var')
     end
 end
 
+% set individuals
+uniquePersonVal = cellfun(@(x)x(2)+x(3), YOri);
+kid = [0;cumsum(diff(uniquePersonVal) ~= 0)];
+%tmp = [kid uniquePersonVal]; tmp(1:20,:)
+uniqueKid = unique(kid);
+
+% select training and testing set
+YFinal = categorical(cellfun(@(x)x(1), YOri)); % gender=1 { 'gender' 'age' 'handedness' 'eyeclosed' 'trial' }
 rng(1);
-shuffledInd = shuffle([1:length(YOri)]);
-trainInd = [1:round(length(YOri)*0.8)];
-testInd  = [round(length(YOri)*0.8)+1:round(length(YOri)*0.9)];
-holdInd  = [round(length(YOri)*0.9):length(YOri)];
-XTrain = XOri(shuffledInd(trainInd)); YTrain = YOri(shuffledInd(trainInd));
-XTest  = XOri(shuffledInd(testInd));  YTest  = YOri(shuffledInd(testInd));
-XHold  = XOri(shuffledInd(holdInd));  YHold  = YOri(shuffledInd(holdInd));
+kidInds = randperm(length(uniqueKid));
 
-if iscell(YTrain(1))
-    catVals = { 'gender' 'age' 'handedness' 'eyeclosed' 'trial' }
-    catInd = 4
-    YTrain = categorical(cellfun(@(x)x(catInd), YTrain));
-    YTest  = categorical(cellfun(@(x)x(catInd), YTest));
-    YHold  = categorical(cellfun(@(x)x(catInd), YHold));
-end
+numTrain= ceil(length(uniqueKid)*0.8);
+kidTrain = uniqueKid(1:numTrain);
+indTrain = ismember(kid, kidTrain);
+XTrain = XOri(indTrain);
+YTrain = YFinal(indTrain);
 
+kidTest = uniqueKid(numTrain+1:end);
+indTest = ismember(kid, kidTest);
+XTest  = XOri(indTest);
+YTest  = YFinal(indTest);
 
-fprintf('Traning length: %1.0f (n=%d)\n', percentTrain, length(trainInd));
 try
     d = gpuDevice
 catch
@@ -52,14 +49,18 @@ catch
     end
 end
 % network architecture
+% 20 hidden bilstmLayer units -> 70%
+% 20 hidden bilstmLayer units -> 70%
+
 inputSize = size(XTrain{1},1);
-numHiddenUnits = 100;
+numHiddenUnits = 12;
 numClasses = 2;
-inputLayerParameters = {'normalization', 'rescale-zero-one', 'normalizationdimension', 'channel' }'
+inputLayerParameters = {'normalization', 'zerocenter', 'normalizationdimension', 'channel' }'
 layers = [ ...
     sequenceInputLayer(inputSize, inputLayerParameters{:})
 %    bilstmLayer(numHiddenUnits,'OutputMode','last')
     ... % lstmLayer(numHiddenUnits,'OutputMode','last')
+    bilstmLayer(numHiddenUnits,'OutputMode','last')
     bilstmLayer(numHiddenUnits,'OutputMode','last')
 %     fullyConnectedLayer(numHiddenUnits/2)
 %     gruLayer(numHiddenUnits/2,'OutputMode','last')
@@ -71,15 +72,20 @@ layers = [ ...
     % analyzeNetwork(layers); % show network
     
 % Training parameters
+miniBatchSize = 1024; % power of 2
+valFrequency = floor(length(XOri)/miniBatchSize);
 options = trainingOptions('adam', ...
     'ExecutionEnvironment','gpu', ...
-    'MaxEpochs',3000, ... % number of steps
-    'MiniBatchSize', 5000, ... % number of example used at each step, 128 default
-    'InitialLearnRate', 0.0001, ...
+    'MaxEpochs',180, ... % number of steps
+    'MiniBatchSize', miniBatchSize, ... % number of example used at each step, 128 default
+    'InitialLearnRate', 0.001, ...
+    'LearnRateSchedule', 'piecewise', ...
+    'LearnRateDropFactor', 0.1, ...
+    'LearnRateDropPeriod', 40, ... % or 30
+    'ValidationData', {XTest YTest}, ...
+    'ValidationFrequency', valFrequency, ...
     'SequenceLength','longest', ...
     'Shuffle','every-epoch', ... % or never, every-epoch
-    'Verbose',1, ...
-    'VerboseFrequency', 50, ...
     'Plots','training-progress') % visual interface
 
 % Train network

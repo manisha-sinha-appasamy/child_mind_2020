@@ -96,6 +96,7 @@ parfor iFold = 1:length(folders)
                 end
                 
                 % copy info
+                EEG.subject    = info{infoRow(1),1};
                 EEG.gender     = info{infoRow(1),2};
                 EEG.age        = info{infoRow(1),3};
                 EEG.handedness = info{infoRow(1),4};

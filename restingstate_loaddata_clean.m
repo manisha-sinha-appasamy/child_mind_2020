@@ -22,11 +22,11 @@ for iFile = 1:length(fileNamesOpen)
             XData = {}; YData = {};
             for iTrial = 1:EEGOpen.trials
                 XData{end+1} = EEGOpen.data(:,:,iTrial);
-                YData{end+1} = [ EEGOpen.gender EEGOpen.age EEGOpen.handedness EEGOpen.eyesclosed iTrial ]; 
+                YData{end+1} = [ EEGOpen.gender EEGOpen.age EEGOpen.handedness EEGOpen.eyesclosed iTrial iFile ]; 
             end
             for iTrial = 1:EEGClosed.trials
                 XData{end+1} = EEGClosed.data(:,:,iTrial);
-                YData{end+1} = [ EEGClosed.gender EEGClosed.age EEGClosed.handedness EEGClosed.eyesclosed iTrial ]; 
+                YData{end+1} = [ EEGClosed.gender EEGClosed.age EEGClosed.handedness EEGClosed.eyesclosed iTrial iFile ]; 
             end
             XOri{iFile} = XData;
             YOri{iFile} = YData;
