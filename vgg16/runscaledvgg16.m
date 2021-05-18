@@ -13,7 +13,7 @@ subsample = 8;
 if 1
     layers2 = rescalenetwork(layers, [28 28 3], subsample, 2, [26:32]); % net1
     layers2 = rescalenetwork(layers, [28 28 3], 1, 2, [26:32]);         % net2
-    layers2 = rescalenetwork(layers, [28 28 3], subsample, 2, [19:32]); % net3
+    layers2 = rescalenetwork(layers, [24 24 3], subsample, 2, [19:32]); % net3
     %layers2 = rescalenetwork(layers, [28 28 3], subsample, 2, [26:32]); % net4
 else
     layers2 = [ imageInputLayer([ 28 28 3]) ...
