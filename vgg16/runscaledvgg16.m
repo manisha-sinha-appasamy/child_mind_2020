@@ -10,7 +10,7 @@ XOriSpec(isnan(XOriSpec(:))) = 0;
 layers = vgg16 ('Weights', 'none');
 
 subsample = 8;
-if 1
+if 0
     layers2 = rescalenetwork(layers, [28 28 3], subsample, 2, [26:32]); % net1
     layers2 = rescalenetwork(layers, [28 28 3], 1, 2, [26:32]);         % net2
     layers2 = rescalenetwork(layers, [24 24 3], subsample, 2, [19:32]); % net3
@@ -88,7 +88,7 @@ elseif 0
 end
 
 %% options
-miniBatchSize = 1024; % power of 2
+miniBatchSize = 256; % power of 2
 valFrequency = floor(length(XOriSpec)/miniBatchSize);
 options = trainingOptions('sgdm', ...
     'MiniBatchSize',miniBatchSize, ...
@@ -103,3 +103,5 @@ options = trainingOptions('sgdm', ...
     'Verbose',false, ...
     'Plots','training-progress');
 net = trainNetwork(dsTrain,layers2,options);
+
+save('-mat', 'net.mat', 'net');
