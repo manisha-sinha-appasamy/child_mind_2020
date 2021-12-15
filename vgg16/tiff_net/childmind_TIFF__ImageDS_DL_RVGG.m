@@ -15,6 +15,7 @@ load child_mind_x_train_2s_24chan_raw.mat % loads X_train
 % load training labels
 load child_mind_all_labels_train_2s_24chan_raw.mat % loads Y_train
 
+% Create folders where the images will be saved. The foldernames will serve as labels.
 cd train;
 train_labels = string(Y_train(:,2));
 train_foldernames = string(unique(cell2mat(Y_train(:,2))));
@@ -25,6 +26,7 @@ end
 % number of training samples (each sample = 24 x 256 size)
 num_train = size(X_train,3);
 
+% convert training samples to tiff images
 mat2tiff(X_train,train_labels,num_train)
 cd ..
 
@@ -41,6 +43,7 @@ load child_mind_x_val_2s_24chan_raw.mat % loads X_val
 % load validation labels
 load child_mind_all_labels_val_2s_24chan_raw.mat % loads Y_val
 
+% Create folders where the images will be saved. The foldernames will serve as labels.
 cd val;
 val_labels = string(Y_val(:,2));
 val_foldernames = string(unique(cell2mat(Y_val(:,2))));
@@ -52,6 +55,7 @@ end
 % num of validation samples
 num_val = size(X_val,3); 
 
+% convert validation samples to tiff images
 mat2tiff(X_val,val_labels,num_val)
 cd ..
 
@@ -105,7 +109,8 @@ load child_mind_x_test_2s_24chan_raw.mat % loads X_test
 
 % load training labels
 load child_mind_all_labels_test_2s_24chan_raw.mat % loads Y_test
-%% Create folders where the images will be saved. The foldernames will serve as labels
+
+% Create folders where the images will be saved. The foldernames will serve as labels
 
 cd test
 test_labels = string(Y_test(:,2));
@@ -115,10 +120,10 @@ if ~exist(test_foldernames(1),'dir')
 end
 
 
-%% Convert test samples to tif files
-
 % num of test samples
 num_test = size(X_test,3);
+
+% Convert test samples to tif files
 mat2tiff(X_test,test_labels,num_test)
 
 cd ..
