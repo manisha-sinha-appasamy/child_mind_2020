@@ -2,7 +2,7 @@ function mat2tiff(m_data,labels,num_samples)
 % this function converts a 3D mat file to grey scale tiff images and saves
 % them in the current folder by default
     for i = 1:num_samples
-        filename = [labels(i)+'\sample'+num2str(i)+'.tif'];
+        filename = [labels(i)+'/sample'+num2str(i)+'.tif'];
         t = Tiff(filename, 'w');
         tagstruct.ImageLength = size(m_data,1);
         tagstruct.ImageWidth = size(m_data,2);
