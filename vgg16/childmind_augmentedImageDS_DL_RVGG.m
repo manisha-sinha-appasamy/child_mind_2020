@@ -6,13 +6,15 @@ load('R-VGG.mat')
 %% Pre-process Training data ===================================
 
 % load training data
-load child_mind_x_train_2s_24chan_raw.mat % loads X_train
+load('-mat','/expanse/projects/nemar/dtyoung/DL-EEG/data/child_mind_x_train_2s_24chan_raw.mat');
+% load child_mind_x_train_2s_24chan_raw.mat % loads X_train
 
 % load training labels
-load child_mind_all_labels_train_2s_24chan_raw.mat % loads Y_train
+load('-mat','/expanse/projects/nemar/dtyoung/DL-EEG/data/child_mind_y_train_2s_24chan_raw.mat');
+% load child_mind_all_labels_train_2s_24chan_raw.mat % loads Y_train
 
 % labels must be categorical for the classification to work!
-train_labels = categorical(cell2mat(Y_train(:,2))); 
+train_labels = categorical(Y_train); 
 
 image_height = size(X_train,1);
 image_width = size(X_train,2);
@@ -33,13 +35,15 @@ augimds = augmentedImageDatastore(imageSize,X_train,train_labels);
 %% Pre-process Validation data ===================================
 
 % load validation data
-load child_mind_x_val_2s_24chan_raw.mat % loads X_val
+load('-mat','/expanse/projects/nemar/dtyoung/DL-EEG/data/child_mind_x_val_2s_24chan_raw.mat');
+%load child_mind_x_val_1s_24chan_raw.mat % loads X_val
 
 % load validation labels
-load child_mind_all_labels_val_2s_24chan_raw.mat % loads Y_val
+load('-mat','/expanse/projects/nemar/dtyoung/DL-EEG/data/child_mind_y_val_2s_24chan_raw.mat');
+%load child_mind_all_labels_val_2s_24chan_raw.mat % loads Y_val
 
 % labels must be categorical for the classification to work!
-val_labels = categorical(cell2mat(Y_val(:,2)));
+val_labels = categorical(Y_val);
 
 % num of validation samples
 num_val = size(X_val,3); 

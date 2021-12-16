@@ -10,15 +10,15 @@ load('R-VGG_noNormalization.mat')
 %% Pre-process Training data
 
 % load training data
-load child_mind_x_train_2s_24chan_raw.mat % loads X_train
+load('-mat','/expanse/projects/nemar/dtyoung/DL-EEG/data/child_mind_x_train_2s_24chan_raw.mat');
 
 % load training labels
-load child_mind_all_labels_train_2s_24chan_raw.mat % loads Y_train
+load('-mat','/expanse/projects/nemar/dtyoung/DL-EEG/data/child_mind_y_train_2s_24chan_raw.mat');
 
 % Create folders where the images will be saved. The foldernames will serve as labels.
 cd train;
-train_labels = string(Y_train(:,2));
-train_foldernames = string(unique(cell2mat(Y_train(:,2))));
+train_labels = string(Y_train);
+train_foldernames = unique(train_labels);;
 if ~exist(train_foldernames(1),'dir')
     cellfun(@mkdir,train_foldernames);
 end
